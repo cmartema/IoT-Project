@@ -8,7 +8,7 @@
 
 const char* ssid = "Columbia University";
 const char* password ="";
-const char* host_ip = "10.206.96.143";
+const char* host_ip = "10.207.50.131";
 const int port = 54235;
 
 #define STMPE_CS 32
@@ -79,30 +79,6 @@ void setup() {
   Serial.println("WiFi connected with IP address: ");
   Serial.println(WiFi.localIP());
 
-
-  //--------------- setup touch field -------------------------
-
-  int X_start = TSC_TS_MINX;
-  int X_finish = TSC_TS_MAXX;
-  int Y_start = TSC_TS_MINY;
-  int Y_finish = TSC_TS_MAXY;
-
-  process(); //jump straight into loop
-
-}
-
-
-void loop() {//main operation loop
-
-
-}
-
-//----------------------------------------------------------
-void checkPasscode(int codeArray[], int size) {
-    int tmp_psswd[4] = {2, 0, 2, 3};
-    bool check = true;
-
-
     delay(800);
     Serial.print("connecting to ");
     Serial.println(host_ip);
@@ -120,40 +96,30 @@ void checkPasscode(int codeArray[], int size) {
         return;
     }
 
-    // This will send the data to the server 
-    client.print("hello world");
-    client.stop();
 
+  //--------------- setup touch field -------------------------
 
+  int X_start = TSC_TS_MINX;
+  int X_finish = TSC_TS_MAXX;
+  int Y_start = TSC_TS_MINY;
+  int Y_finish = TSC_TS_MAXY;
 
-     
-    int i = 0;
-    while(i < size) {
-      if (tmp_psswd[i] != codeArray[i]) {
-        check = false;
-        break;
-      }
-      i++;
+  process(); //jump straight into loop
+
+}
+
+//----------------------------------------------------------
+void checkPasscode(int codeArray[], int size) {
+    client.print("[1]"); //To inform host that client is sending passcode
+    // Wait for a response
+    while (Serial.available() == 0) {
+      // Wait until there is data to read
     }
-    
-    if (!check) {
-        //Serial.println("Password does not match");
-        tft.fillScreen(BLACK);
-        tft.setTextColor(RED);
-        tft.setCursor(10, 10);
-        tft.setTextSize(2);
-        tft.println("Incorrect Passcode");
-        delay(500);
 
-    } else {
-        //Serial.println("Password match");
-        tft.fillScreen(BLACK);
-        tft.setTextColor(GREEN);
-        tft.setCursor(10, 10);
-        tft.setTextSize(2);
-        tft.println("Access Granted!");
-        delay(500);
-    }
+    // Read the response
+    String response = Serial.readString();
+    Serial.print("Received: ");
+    Serial.println(response);
     
   }
 
@@ -315,6 +281,10 @@ void process() {
   //keypad key read loop
 
   while (1) {
+
+    delay(100); //delay for stability, might not be required
+    client.print("[0]") // To inform host that client is connected
+
     TS_Point null = TS_Point(0, 0, 0);
     
     if (ts.getPoint() != null) {
