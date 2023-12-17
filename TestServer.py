@@ -8,7 +8,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 # Define the server's IP address and port
-ip = '10.207.50.131'  # localhost
+ip = '10.207.105.23'  # localhost
 port = 54235         # choose an available port
 BUFLEN = 512
 
@@ -26,11 +26,9 @@ module = 1
 info = ''
 while True:
     received = DataSocket.recv(BUFLEN)
-    if not received:
-        break
     info = received.decode()
     print(f'receive: {info}')
-    DataSocket.send('[0] successfully received'.encode())
+    DataSocket.send('[1] successfully received'.encode())
 
 DataSocket.close()
 ListenSocket.close()
