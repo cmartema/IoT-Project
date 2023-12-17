@@ -85,7 +85,19 @@ void setup(){
   int Y_start = TSC_TS_MINY;
   int Y_finish = TSC_TS_MAXY;
 
-  loop(); //jump straight into loop
+    // tft.fillScreen(BLUE);  
+    // tft.fillRect(130, 10, 100, 30, BLACK);
+ 
+    // delay(5000);
+    // tft.fillRect(10, 10, 220, 30, BLACK); 
+
+    
+    // tft.setTextColor(WHITE);                 //write "user code" text into box
+    // tft.setCursor(10, 15);
+    // tft.setTextSize(2);
+    // tft.println("User code:");
+  
+    loop(); //jump straight into loop
 
 }
 
@@ -135,8 +147,8 @@ void loop(){
     Serial.println(send_msg);
     client.print(send_msg);
     while (client.available() == 0) {
-      Serial.println("waiting for data");
-      delay(100);
+      // Serial.println("waiting for data");
+      delay(1000);
     }
     String response = client.readString();
 
@@ -146,18 +158,20 @@ void loop(){
     
     mode = response[1];
 
-    if (mode == '1'){
+    if (mode == '1' && keypressIndex == 0){
       keypad();
       input = true;
-    } else if (mode == '2'){
+    } else if (mode == '2' && keypressIndex == 0){
       for (int i = 4; i < response.length(); i++){
         rcv_msg += response[i];
       } 
-      tft.fillScreen(BLACK);
+     
       tft.setTextColor(RED);
       tft.setCursor(10, 10);
+      tft.setAddrWindow(10, 10, 220, 30);
       tft.setTextSize(2);
       tft.println(rcv_msg);
+
       delay(1000);
       keypad();
       input = true;
@@ -165,9 +179,10 @@ void loop(){
       for (int i = 4; i < response.length(); i++){
         rcv_msg += response[i];
       }
-      tft.fillScreen(BLACK);
+     
       tft.setTextColor(RED);
       tft.setCursor(10, 10);
+      tft.setAddrWindow(10, 10, 220, 30);
       tft.setTextSize(2);
       tft.println(rcv_msg);
       delay(1000);
@@ -244,6 +259,7 @@ void loop(){
       //------------------------- clear code -----------------------------------------------
 
       if (isAdd) {// clear key
+        keypressIndex = 0;
         send_msg = "[2] ";
         for(int i = 0; i < 4; i++){
            send_msg += codeArray[i];
@@ -255,6 +271,7 @@ void loop(){
       }
     
       if (isEnter){
+        keypressIndex = 0;
         send_msg = "[1] ";
         for(int i = 0; i < 4; i++){
            send_msg += codeArray[i];
