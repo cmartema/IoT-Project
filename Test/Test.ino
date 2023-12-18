@@ -9,8 +9,8 @@
 
 const char* ssid = "Columbia University";
 const char* password ="";
-const char* host_ip = "10.207.105.23";
-const int port = 54235;
+const char* host_ip = "10.206.23.100";
+const int port = 50000;
 
 #define STMPE_CS 32
 #define TFT_CS   15
@@ -96,7 +96,7 @@ void setup(){
     // tft.setCursor(10, 15);
     // tft.setTextSize(2);
     // tft.println("User code:");
-  
+    keypad();
     loop(); //jump straight into loop
 
 }
@@ -135,62 +135,66 @@ void loop(){
     return;
   }
 
-  char mode = '1';
-  String send_msg = "[0]";
-  String rcv_msg = "";
+
+  char mode = '\0';
+  String send_msg = "";
+  String received_msg = "";
 
 
   //keypad key read loop
 
   while (1) {
-    bool input = false;
-    Serial.println(send_msg);
-    client.print(send_msg);
-    while (client.available() == 0) {
-      // Serial.println("waiting for data");
-      delay(1000);
-    }
-    String response = client.readString();
-
-    if (send_msg != "[0]"){
-      send_msg = "[0]";
-    }
+    if (client.available() != 0) {
+      Serial.println("Host message is available");
+      String response = client.readString();
     
-    mode = response[1];
 
-    if (mode == '1' && keypressIndex == 0){
-      keypad();
-      input = true;
-    } else if (mode == '2' && keypressIndex == 0){
-      for (int i = 4; i < response.length(); i++){
-        rcv_msg += response[i];
-      } 
-     
-      tft.setTextColor(RED);
-      tft.setCursor(10, 10);
-      tft.setAddrWindow(10, 10, 220, 30);
-      tft.setTextSize(2);
-      tft.println(rcv_msg);
+      if (response[1] == '0'){
+        Serial.println("Response is 0");
+        mode = response[1];
+        for (int i = 4; i < response.length(); i++){
+          received_msg += response[i];
+        }
+        client.print("ack"); // send ack to host
+        Serial.println("ack sent");
+        Serial.print("received message: ");
+        Serial.println(received_msg);
+        tft.fillRect(10, 10, 220, 30, BLACK); 
+        tft.setTextColor(RED);
+        tft.setCursor(10, 10);
+        tft.setAddrWindow(10, 10, 220, 30);
+        tft.setTextSize(2);
+        tft.println(received_msg);
+        received_msg = ""; // clear received message
+  
+      } else {
+        keypad();
+      
+        for (int i = 0; i < keypressIndex; i++) { 
+          tft.setTextColor(GREEN); tft.setCursor(130 + 25 * i, 10); 
+          tft.setTextSize(4); 
+          tft.println(codeArray[i]); 
+        }
 
-      delay(1000);
-      keypad();
-      input = true;
-    }else{
-      for (int i = 4; i < response.length(); i++){
-        rcv_msg += response[i];
+        Serial.print("Response is: ");
+        Serial.println(response);
+        mode = response[1];
+        received_msg = ""; // clear received message
+        if (send_msg == "") {
+          Serial.println("send message is NULL");
+          client.print("ack"); // send ack to host
+        }else{
+          client.print(send_msg);
+          Serial.print("sent message: ");
+          Serial.println(send_msg);
+        } 
+        send_msg = "";  // clear send message
+        Serial.println("received message is NULL");
       }
-     
-      tft.setTextColor(RED);
-      tft.setCursor(10, 10);
-      tft.setAddrWindow(10, 10, 220, 30);
-      tft.setTextSize(2);
-      tft.println(rcv_msg);
-      delay(1000);
     }
-
 
     TS_Point null = TS_Point(0, 0, 0);
-    if (ts.getPoint() != null && input ) {
+    if (ts.getPoint() != null) {
       TS_Point p = ts.getPoint();
       bool isAdd = false;
       bool isEnter = false;
@@ -215,52 +219,44 @@ void loop(){
       }
       if (p.x < presscol2 && p.x > presscol3 && p.y < pressrow4 && p.y > pressrow5) keypress = 0;
 
-      if (p.x < presscol3 && p.x > presscol4 && p.y < pressrow4 && p.y > pressrow5) isEnter = true;
- 
-      delay(300); // to prevent multiple presses //delay for stability, might not be required
-
-      if (keypress != 55 || keypress != -55) {
-        codeArray[keypressIndex] = keypress;
-            
-        //----------------------------- display keypress ----------------------------------------------
-
-        //dipslays the 4 digit code on the screen
-
-        if (keypressIndex == 0) { //display first digit
-          tft.setTextColor(GREEN);
-          tft.setCursor(130, 10);
-          tft.setTextSize(4);
-          tft.println(codeArray[0]);
-        }
-
-        if (keypressIndex == 1) { //display second digit
-          tft.setTextColor(GREEN);
-          tft.setCursor(155, 10);
-          tft.setTextSize(4);
-          tft.println(codeArray[1]);
-        }
-
-        if (keypressIndex == 2) { // display third digit
-          tft.setTextColor(GREEN);
-          tft.setCursor(180, 10);
-          tft.setTextSize(4);
-          tft.println(codeArray[2]);
-        }
-
-        if (keypressIndex == 3) { //display forth digit
-          tft.setTextColor(GREEN);
-          tft.setCursor(205, 10);
-          tft.setTextSize(4);
-          tft.println(codeArray[3]);
-        }
-          
+      if (p.x < presscol3 && p.x > presscol4 && p.y < pressrow4 && p.y > pressrow5){
+        isEnter = true; 
+        keypress = 55;
+      }
+      
+      Serial.print("codeArray: ");
+      for(int i = 0; i < 4; i++){
+          Serial.print(codeArray[i]);
       } 
+      Serial.println("");
 
+      if (keypressIndex < 4 && keypress != 55) {
+        codeArray[keypressIndex] = keypress; 
+        keypressIndex++; //increment array index number
+          //----------------------------- display keypress ----------------------------------------------
+          //dipslays the 4 digit code on the screen
+        keypad();
+        for (int i = 0; i < 4; i++) { 
+          tft.setTextColor(GREEN); tft.setCursor(130 + 25 * i, 10); 
+          tft.setTextSize(4); 
+          tft.println(codeArray[i]); 
+        }
+        delay(300); // to prevent multiple presses
+      }
+       
+
+     
       //------------------------- clear code -----------------------------------------------
-
+    
       if (isAdd) {// clear key
         keypressIndex = 0;
         send_msg = "[2] ";
+        Serial.println("Add was pressed");
+        Serial.print("codeArray: ");
+        for(int i = 0; i < 4; i++){
+           Serial.print(codeArray[i]);
+        } 
+        Serial.println("");
         for(int i = 0; i < 4; i++){
            send_msg += codeArray[i];
         }
@@ -268,11 +264,18 @@ void loop(){
         codeArray[1] = 0;
         codeArray[2] = 0;
         codeArray[3] = 0;
+        keypad();
       }
     
       if (isEnter){
         keypressIndex = 0;
         send_msg = "[1] ";
+        Serial.println("Enter was pressed");
+        Serial.print("codeArray: ");
+        for(int i = 0; i < 4; i++){
+           Serial.print(codeArray[i]);
+        } 
+        Serial.println("");
         for(int i = 0; i < 4; i++){
            send_msg += codeArray[i];
         }
@@ -280,19 +283,20 @@ void loop(){
         codeArray[1] = 0;
         codeArray[2] = 0;
         codeArray[3] = 0;
+        keypad();
       }
     
 
-      keypressIndex++;  //increment keypress index to store next key
+      
 
       delay(300); // to prevent multiple presses
     }
+     
   }
 }
 
-void keypad(){
-
-  tft.fillScreen(BLACK);                   //clear screen
+void keypad(){                
+  tft.fillScreen(BLACK);                   //sets screen to black
 
   tft.drawRect(0, 0, 240, 320, WHITE);     //outline frame of keypad
 
