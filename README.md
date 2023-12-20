@@ -6,7 +6,7 @@ This project involves the development of a Smart Biometric Lock system using an 
 
 ## Components
 
-![Block Diagram for project](https://github.com/cmartema/IoT-Project/src/BlockDiagram.png)
+![Block Diagram for project](https://github.com/cmartema/IoT-Project/blob/main/src/BlockDiagram.png)
 
 ### Libraries:
 
