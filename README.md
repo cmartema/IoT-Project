@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project involves the development of a Smart Biometric Lock system using an ESP32 or similar microcontroller. The system incorporates a touchscreen keypad interface with an ILI9341 TFT display and communicates over WiFi. Users can enter a 4-digit code using the touchscreen keypad, and the system communicates with a backend server for authentication.
+This project involves the development of a Smart Biometric Lock system using an ESP32. The system incorporates a touchscreen keypad interface with an ILI9341 TFT display and communicates over WiFi. Users can enter a 4-digit code using the touchscreen keypad, and the system communicates with a backend server for authentication.
 
 ## Components
 
