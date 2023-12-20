@@ -1,4 +1,4 @@
-# Smart Biometric Lock with Touchscreen Keypad
+# Smart Biometric Lock with Touchscreen Keypad (Final IoT Project)
 
 ## Overview
 
