@@ -120,8 +120,8 @@ The `keypad()` function is defined to draw a simple keypad on the TFT display. I
 
 5. **User Interaction:** Users can either present a fingerprint or enter a passcode to unlock doors. For adding new fingerprints, a registration process is initiated.
 
-**Contributors**
-    https://github.com/AT-OY
-    https://github.com/Kenliao0603
-    https://github.com/cmartema
+## Contributors
+- [AT-OY](https://github.com/AT-OY)
+- [Kenliao0603](https://github.com/Kenliao0603)
+- [cmartema](https://github.com/cmartema)
     
